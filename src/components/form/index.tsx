@@ -2,6 +2,23 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 
+const genderOptions = [
+  'Masculino',
+  'Feminino',
+  'Prefiro não responder'
+] as const
+
+const bloodOptions = [
+  'A+',
+  'A-',
+  'B+',
+  'B-',
+  'AB+',
+  'AB-',
+  'O+-',
+  'O-'
+] as const
+
 const formSchema = z.object({
   nome: z
     .string()
@@ -9,9 +26,11 @@ const formSchema = z.object({
       message: 'O nome deve ter no mínimo 2 caracteres.'
     })
     .max(100, { message: 'O nome deve ter no máximo 100 caracteres.' }),
-  genero: z.string(),
-  tipoSanguineo: z.string({
-    message: 'Selecione uma opção de tipo sanguineo.'
+  genero: z.enum(genderOptions, {
+    errorMap: () => ({ message: 'Selecione uma opção de gênero.' })
+  }),
+  tipoSanguineo: z.enum(bloodOptions, {
+    errorMap: () => ({ message: 'Selecione uma opção de tipo sanguíneo.' })
   }),
   termosAceitos: z.literal(true, {
     errorMap: () => ({ message: 'Você deve aceitar os termos.' })
@@ -66,39 +85,25 @@ export default function Form() {
         <option value="" hidden>
           Selecione seu Gênero
         </option>
-        <option value="masculino">Masculino</option>
-        <option value="feminino">Feminino</option>
-        <option value="prefiro não responder">Prefiro não responder</option>
+        <option value={genderOptions[0]}>Masculino</option>
+        <option value={genderOptions[1]}>Feminino</option>
+        <option value={genderOptions[2]}>Prefiro não responder</option>
       </select>
+
+      {errors.genero && (
+        <span className="text-[#f31]">{errors.genero.message}</span>
+      )}
 
       <div className="p-3">
         <p>Tipo Sanguíneo</p>
         <div className="flex items-center gap-1">
           <input
             type="radio"
-            id="O-"
-            value="O-"
+            id="A-"
+            value="A-"
             {...register('tipoSanguineo')}
           />
-          <label htmlFor="O-">O-</label>
-        </div>
-        <div className="flex items-center gap-1">
-          <input
-            type="radio"
-            id="O+"
-            value="O+"
-            {...register('tipoSanguineo')}
-          />
-          <label htmlFor="O+">O+</label>
-        </div>
-        <div className="flex items-center gap-1">
-          <input
-            type="radio"
-            id="B-"
-            value="B-"
-            {...register('tipoSanguineo')}
-          />
-          <label htmlFor="B-">B-</label>
+          <label htmlFor="A-">A-</label>
         </div>
         <div className="flex items-center gap-1">
           <input
@@ -112,11 +117,47 @@ export default function Form() {
         <div className="flex items-center gap-1">
           <input
             type="radio"
-            id="naoSei"
-            value="Não sei"
+            id="B-"
+            value="B-"
             {...register('tipoSanguineo')}
           />
-          <label htmlFor="naoSei">Não sei</label>
+          <label htmlFor="B-">B-</label>
+        </div>
+        <div className="flex items-center gap-1">
+          <input
+            type="radio"
+            id="AB+"
+            value="AB+"
+            {...register('tipoSanguineo')}
+          />
+          <label htmlFor="AB+">AB+</label>
+        </div>
+        <div className="flex items-center gap-1">
+          <input
+            type="radio"
+            id="AB-"
+            value="AB-"
+            {...register('tipoSanguineo')}
+          />
+          <label htmlFor="AB-">AB-</label>
+        </div>
+        <div className="flex items-center gap-1">
+          <input
+            type="radio"
+            id="O+"
+            value="O+"
+            {...register('tipoSanguineo')}
+          />
+          <label htmlFor="O+">O+</label>
+        </div>
+        <div className="flex items-center gap-1">
+          <input
+            type="radio"
+            id="O-"
+            value="O-"
+            {...register('tipoSanguineo')}
+          />
+          <label htmlFor="O-">O-</label>
         </div>
         {errors.tipoSanguineo && (
           <span className="text-[#f31]">{errors.tipoSanguineo.message}</span>
