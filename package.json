@@ -16,7 +16,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "serve": "vite preview",
-    "test": "vitest",
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
     "test:ui": "vitest --ui",
     "lint": "eslint src --max-warnings=0",
     "typecheck": "tsc --project tsconfig.json --noEmit"
@@ -29,6 +30,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@playwright/test": "^1.44.1",
     "@testing-library/jest-dom": "^6.4.5",
     "@testing-library/react": "^14.3.1",
     "@types/node": "^20.12.12",

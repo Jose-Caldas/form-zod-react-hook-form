@@ -3,22 +3,22 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 
-const genderOptions = [
-  'Masculino',
-  'Feminino',
-  'Prefiro não responder'
-] as const
+// const genderOptions = [
+//   'Masculino',
+//   'Feminino',
+//   'Prefiro não responder'
+// ] as const
 
-const bloodOptions = [
-  'A+',
-  'A-',
-  'B+',
-  'B-',
-  'AB+',
-  'AB-',
-  'O+-',
-  'O-'
-] as const
+// const bloodOptions = [
+//   'A+',
+//   'A-',
+//   'B+',
+//   'B-',
+//   'AB+',
+//   'AB-',
+//   'O+-',
+//   'O-'
+// ] as const
 
 const formSchema = z.object({
   nome: z
@@ -35,20 +35,20 @@ const formSchema = z.object({
           return word[0].toLocaleUpperCase().concat(word.substring(1))
         })
         .join(' ')
-    }),
-  genero: z.enum(genderOptions, {
-    errorMap: () => ({ message: 'Selecione uma opção de gênero.' })
-  }),
-  tipoSanguineo: z.enum(bloodOptions, {
-    errorMap: () => ({ message: 'Selecione uma opção de tipo sanguíneo.' })
-  }),
-  termosAceitos: z.literal(true, {
-    errorMap: () => ({ message: 'Você deve aceitar os termos.' })
-  }),
-  dataConsulta: z.coerce
-    .date({ errorMap: () => ({ message: 'Data inválida.' }) })
-    .refine((data) => data > new Date(), { message: 'Data inválida.' })
-    .transform((data) => data.toISOString().split('T')[0])
+    })
+  // genero: z.enum(genderOptions, {
+  //   errorMap: () => ({ message: 'Selecione uma opção de gênero.' })
+  // }),
+  // tipoSanguineo: z.enum(bloodOptions, {
+  //   errorMap: () => ({ message: 'Selecione uma opção de tipo sanguíneo.' })
+  // }),
+  // termosAceitos: z.literal(true, {
+  //   errorMap: () => ({ message: 'Você deve aceitar os termos.' })
+  // }),
+  // dataConsulta: z.coerce
+  //   .date({ errorMap: () => ({ message: 'Data inválida.' }) })
+  //   .refine((data) => data > new Date(), { message: 'Data inválida.' })
+  //   .transform((data) => data.toISOString().split('T')[0])
 })
 
 type FormSchema = z.infer<typeof formSchema>
@@ -64,12 +64,16 @@ export default function Form() {
     resolver: zodResolver(formSchema)
   })
 
+  console.log('erros', errors)
+
   function handleFormSubmit(data: FormSchema) {
+    console.log('Dados', data)
     setOutput(JSON.stringify(data, null, 2))
   }
 
   return (
     <div className="flex gap-10">
+      <a href="https://www.josecaldas.dev/">Get Start</a>
       <form
         onSubmit={handleSubmit(handleFormSubmit)}
         className="flex w-96 flex-col px-8 py-6 shadow-md"
@@ -84,10 +88,12 @@ export default function Form() {
           {...register('nome')}
         />
         {errors.nome && (
-          <span className="text-[#f31]">{errors.nome.message}</span>
+          <span id="error-message" className="text-[#f31]">
+            {errors.nome.message}
+          </span>
         )}
 
-        <p>Gênero:</p>
+        {/* <p>Gênero:</p>
         <select
           className="mb-2 border bg-[#eee] p-3"
           id="genero"
@@ -192,7 +198,7 @@ export default function Form() {
         />
         {errors.dataConsulta && (
           <span className="text-[#f31]">{errors.dataConsulta.message}</span>
-        )}
+        )} */}
 
         <button type="submit" className="mt-4 border bg-gray-300 p-4 text-base">
           Submeter
@@ -200,7 +206,7 @@ export default function Form() {
       </form>
       <pre className="mt-4">
         <p>Payload:</p>
-        {output}
+        <h1>{output}</h1>
       </pre>
     </div>
   )
