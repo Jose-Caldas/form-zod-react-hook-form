@@ -1,5 +1,24 @@
 import { test, expect } from '@playwright/test'
 
+test('should prepare the entire form and submit', async ({ page }) => {
+  // go to http://localhost:5173/
+  await page.goto('http://localhost:5173/')
+  // click #nome
+  await page.locator('#nome').click()
+  // Fill #nome
+  await page.locator('#nome').fill('jose')
+  // click select
+  await page.locator('#genero').selectOption('Masculino')
+  // click input[type='radio']
+  await page.getByLabel('B-', { exact: true }).check()
+  // click input[type='checkbox']
+  await page.getByLabel('Aceitar Termos').check()
+  // click input[type='date']
+  await page.locator('#dataConsulta').fill('2024-06-12')
+  // click button[type='submit']
+  await page.getByRole('button', { name: 'Submeter' }).click()
+})
+
 test.describe('Form functionality', () => {
   test('should show a message error if input name is empty.', async ({
     page
@@ -7,14 +26,13 @@ test.describe('Form functionality', () => {
     //vai para a pagina do formulario
     await page.goto('http://localhost:5173/')
 
-    // preenche o input name
-    await page.fill('input[type="text"]', '')
+    // input name vazio retorna o erro
+    await page.locator('#nome').fill('')
 
-    // Clica no botão submit
-    await page.click('button[type="submit"]')
+    // Clica no botão Submeter
+    await page.getByRole('button', { name: 'Submeter' }).click()
 
     // input vazio deve mostrar a mensagem de erro
-
     await expect(page.locator('#error-message')).toHaveText(
       'O nome deve ter no mínimo 2 caracteres.'
     )
@@ -26,34 +44,24 @@ test.describe('Form functionality', () => {
     //vai para a pagina do formulario
     await page.goto('http://localhost:5173/')
 
-    // preenche o input name
-    await page.fill('input[type="text"]', 'Jo')
+    // preenche o input name com pelo menos 2 carateres
+    await page.locator('#nome').fill('jo')
 
-    // Clica no botão submit
-    await page.click('button[type="submit"]')
+    // click select e preenche todos os outros campos para não ter erros
+    await page.locator('#genero').selectOption('Masculino')
+    // click input[type='radio']
+    await page.getByLabel('B+', { exact: true }).check()
+    // click input[type='checkbox']
+    await page.getByLabel('Aceitar Termos').check()
+    // click input[type='date']
+    await page.locator('#dataConsulta').fill('2024-06-12')
+    // click button[type='submit']
+    await page.getByRole('button', { name: 'Submeter' }).click()
 
-    // input com 2 caracteres não de aparecer o span
+    // Clica no botão submeter
+    await page.getByRole('button', { name: 'Submeter' }).click()
+
+    // input com 2 caracteres não de aparecer o span de erro
     await expect(page.locator('span')).not.toBeVisible()
   })
-
-  //   test('should show error message with invalid credentials', async ({
-  //     page
-  //   }) => {
-  //     // Navega para a página de login
-  //     await page.goto('https://example.com/login')
-
-  //     // Preenche o campo de email
-  //     await page.fill('input[name="email"]', 'user@example.com')
-
-  //     // Preenche o campo de senha errado
-  //     await page.fill('input[name="password"]', 'wrongpassword')
-
-  //     // Clica no botão de login
-  //     await page.click('button[type="submit"]')
-
-  //     // Verifica se a mensagem de erro é exibida
-  //     await expect(page.locator('.error-message')).toHaveText(
-  //       'Invalid email or password.'
-  //     )
-  //   })
 })
