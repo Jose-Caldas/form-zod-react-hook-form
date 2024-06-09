@@ -3,22 +3,41 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 
-const genderOptions = [
-  'Masculino',
-  'Feminino',
-  'Prefiro não responder'
-] as const
+const genderTypes = ['Masculino', 'Feminino', 'Prefiro não responder'] as const
+const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const
 
-const bloodOptions = [
-  'A+',
-  'A-',
-  'B+',
-  'B-',
-  'AB+',
-  'AB-',
-  'O+-',
-  'O-'
-] as const
+const genderSelectValues = [
+  { value: genderTypes[0] },
+  { value: genderTypes[1] },
+  { value: genderTypes[2] }
+]
+
+const bloodRadioValues = [
+  {
+    value: bloodTypes[0]
+  },
+  {
+    value: bloodTypes[1]
+  },
+  {
+    value: bloodTypes[2]
+  },
+  {
+    value: bloodTypes[3]
+  },
+  {
+    value: bloodTypes[4]
+  },
+  {
+    value: bloodTypes[5]
+  },
+  {
+    value: bloodTypes[6]
+  },
+  {
+    value: bloodTypes[7]
+  }
+]
 
 const formSchema = z.object({
   nome: z
@@ -36,18 +55,22 @@ const formSchema = z.object({
         })
         .join(' ')
     }),
-  genero: z.enum(genderOptions, {
+  genero: z.enum(genderTypes, {
     errorMap: () => ({ message: 'Selecione uma opção de gênero.' })
   }),
-  tipoSanguineo: z.enum(bloodOptions, {
+  tipoSanguineo: z.enum(bloodTypes, {
     errorMap: () => ({ message: 'Selecione uma opção de tipo sanguíneo.' })
   }),
   termosAceitos: z.literal(true, {
     errorMap: () => ({ message: 'Você deve aceitar os termos.' })
   }),
   dataConsulta: z.coerce
-    .date({ errorMap: () => ({ message: 'Data inválida.' }) })
-    .refine((data) => data > new Date(), { message: 'Data inválida.' })
+    .date({
+      errorMap: () => ({ message: 'Selecione uma data depois de hoje.' })
+    })
+    .refine((data) => data > new Date(), {
+      message: 'Selecione uma data depois de hoje.'
+    })
     .transform((data) => data.toISOString().split('T')[0])
 })
 
@@ -72,7 +95,7 @@ export default function Form() {
   }
 
   return (
-    <div className="flex gap-10">
+    <div className="relative flex gap-10">
       <form
         onSubmit={handleSubmit(handleFormSubmit)}
         className="flex w-96 flex-col px-8 py-6 shadow-md"
@@ -85,25 +108,24 @@ export default function Form() {
           id="nome"
           className="mb-4 block w-full border bg-[#eee] p-3 text-base"
           {...register('nome')}
+          aria-describedby="nameError"
         />
         {errors.nome && (
-          <span id="error-message" className="text-[#f31]">
+          <span id="nameError" className="text-[#f31]">
             {errors.nome.message}
           </span>
         )}
 
-        <p>Gênero:</p>
+        <label htmlFor="genero">Gênero:</label>
         <select
           className="mb-2 border bg-[#eee] p-3"
           id="genero"
           {...register('genero')}
         >
-          <option value="" hidden>
-            Selecione seu Gênero
-          </option>
-          <option value={genderOptions[0]}>Masculino</option>
-          <option value={genderOptions[1]}>Feminino</option>
-          <option value={genderOptions[2]}>Prefiro não responder</option>
+          <option value="">Selecione seu Gênero</option>
+          {genderSelectValues.map((gender) => (
+            <option key={gender.value}>{gender.value}</option>
+          ))}
         </select>
 
         {errors.genero && (
@@ -112,69 +134,17 @@ export default function Form() {
 
         <div className="p-3">
           <p>Tipo Sanguíneo</p>
-          <div className="flex items-center gap-1">
-            <input
-              type="radio"
-              id="A-"
-              value="A-"
-              {...register('tipoSanguineo')}
-            />
-            <label htmlFor="A-">A-</label>
-          </div>
-          <div className="flex items-center gap-1">
-            <input
-              type="radio"
-              id="B+"
-              value="B+"
-              {...register('tipoSanguineo')}
-            />
-            <label htmlFor="B+">B+</label>
-          </div>
-          <div className="flex items-center gap-1">
-            <input
-              type="radio"
-              id="B-"
-              value="B-"
-              {...register('tipoSanguineo')}
-            />
-            <label htmlFor="B-">B-</label>
-          </div>
-          <div className="flex items-center gap-1">
-            <input
-              type="radio"
-              id="AB+"
-              value="AB+"
-              {...register('tipoSanguineo')}
-            />
-            <label htmlFor="AB+">AB+</label>
-          </div>
-          <div className="flex items-center gap-1">
-            <input
-              type="radio"
-              id="AB-"
-              value="AB-"
-              {...register('tipoSanguineo')}
-            />
-            <label htmlFor="AB-">AB-</label>
-          </div>
-          <div className="flex items-center gap-1">
-            <input
-              type="radio"
-              id="O+"
-              value="O+"
-              {...register('tipoSanguineo')}
-            />
-            <label htmlFor="O+">O+</label>
-          </div>
-          <div className="flex items-center gap-1">
-            <input
-              type="radio"
-              id="O-"
-              value="O-"
-              {...register('tipoSanguineo')}
-            />
-            <label htmlFor="O-">O-</label>
-          </div>
+          {bloodRadioValues.map((blood) => (
+            <div key={blood.value} className="flex items-center gap-1">
+              <input
+                type="radio"
+                value={blood.value}
+                id={blood.value}
+                {...register('tipoSanguineo')}
+              />
+              <label htmlFor={blood.value}>{blood.value}</label>
+            </div>
+          ))}
           {errors.tipoSanguineo && (
             <span className="text-[#f31]">{errors.tipoSanguineo.message}</span>
           )}
@@ -193,10 +163,13 @@ export default function Form() {
           className="mt-2"
           type="date"
           id="dataConsulta"
+          aria-describedby="dateError"
           {...register('dataConsulta')}
         />
         {errors.dataConsulta && (
-          <span className="text-[#f31]">{errors.dataConsulta.message}</span>
+          <span id="dateError" className="text-[#f31]">
+            {errors.dataConsulta.message}
+          </span>
         )}
 
         <button type="submit" className="mt-4 border bg-gray-300 p-4 text-base">
