@@ -120,6 +120,7 @@ export default function Form() {
         <select
           className="mb-2 border bg-[#eee] p-3"
           id="genero"
+          aria-describedby="selectError"
           {...register('genero')}
         >
           <option value="">Selecione seu Gênero</option>
@@ -129,7 +130,9 @@ export default function Form() {
         </select>
 
         {errors.genero && (
-          <span className="text-[#f31]">{errors.genero.message}</span>
+          <span id="selectError" className="text-[#f31]">
+            {errors.genero.message}
+          </span>
         )}
 
         <div className="p-3">
@@ -140,23 +143,33 @@ export default function Form() {
                 type="radio"
                 value={blood.value}
                 id={blood.value}
+                aria-describedby="radioError"
                 {...register('tipoSanguineo')}
               />
               <label htmlFor={blood.value}>{blood.value}</label>
             </div>
           ))}
           {errors.tipoSanguineo && (
-            <span className="text-[#f31]">{errors.tipoSanguineo.message}</span>
+            <span id="radioError" className="text-[#f31]">
+              {errors.tipoSanguineo.message}
+            </span>
           )}
         </div>
 
         <div className="mt-2 flex flex-col gap-1">
           <div className="flex items-center gap-1">
             <label htmlFor="termo">Aceitar Termos</label>
-            <input type="checkbox" id="termo" {...register('termosAceitos')} />
+            <input
+              type="checkbox"
+              id="termo"
+              aria-describedby="checkboxError"
+              {...register('termosAceitos')}
+            />
           </div>
           {errors.termosAceitos && (
-            <span className="text-[#f31]">{errors.termosAceitos.message}</span>
+            <span id="checkboxError" className="text-[#f31]">
+              {errors.termosAceitos.message}
+            </span>
           )}
         </div>
         <input
