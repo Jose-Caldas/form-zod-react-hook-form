@@ -1,7 +1,8 @@
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import useSWR from 'swr'
 
 const genderTypes = ['Masculino', 'Feminino', 'Prefiro não responder'] as const
 const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const
@@ -76,22 +77,16 @@ const formSchema = z.object({
 
 type FormSchema = z.infer<typeof formSchema>
 
+const fetcher = (url: string | URL | Request) =>
+  fetch(url).then((res) => res.json())
+
 export default function Form() {
-  const [users, setUsers] = useState<FormSchema[]>([])
   const [user, setUser] = useState<FormSchema>()
 
-  async function getUsersFetch() {
-    try {
-      const response = await fetch('http://localhost:8080/users')
-      const data = (await response.json()) as FormSchema[]
-
-      if (response.ok) {
-        setUsers(data)
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
+  const { data: users, error } = useSWR<FormSchema[]>(
+    'http://localhost:8080/users',
+    fetcher
+  )
 
   async function createUserFetch(user: FormSchema) {
     try {
@@ -105,10 +100,6 @@ export default function Form() {
       console.log(error)
     }
   }
-
-  useEffect(() => {
-    getUsersFetch()
-  }, [])
 
   const {
     register,
@@ -230,15 +221,30 @@ export default function Form() {
           </div>
         )}
         <div>
-          <p>Dados vindos da API api:</p>
-          {users?.map((user, i) => (
-            <div className="mb-5 bg-slate-800 p-4" key={user.nome + i}>
-              <p className="text-white">{user.nome}</p>
-              <p className="text-white">{user.genero}</p>
-              <p className="text-white">{user.tipoSanguineo}</p>
-              <p className="text-white">{user.dataConsulta}</p>
+          <p>Dados vindos da API:</p>
+          {error ? (
+            <div>
+              <p>Falhou ao carregar os dados</p>
             </div>
-          ))}
+          ) : (
+            users?.map((user, i) => (
+              <div className="mb-2" key={user.nome + i}>
+                <ul
+                  className="flex flex-col  bg-slate-500 p-3"
+                  key={user.nome + i}
+                >
+                  <li className="text-white">Nome: {user.nome}</li>
+                  <li className="text-white">Genero: {user.genero}</li>
+                  <li className="text-white">
+                    Tipo sanguineo: {user.tipoSanguineo}
+                  </li>
+                  <li className="text-white">
+                    Data da consulta: {user.dataConsulta}
+                  </li>
+                </ul>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
