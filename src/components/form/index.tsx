@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const genderTypes = ['Masculino', 'Feminino', 'Prefiro não responder'] as const
 const bloodTypes = ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] as const
@@ -77,7 +77,38 @@ const formSchema = z.object({
 type FormSchema = z.infer<typeof formSchema>
 
 export default function Form() {
-  const [output, setOutput] = useState('')
+  const [users, setUsers] = useState<FormSchema[]>([])
+  const [user, setUser] = useState<FormSchema>()
+
+  async function getUsersFetch() {
+    try {
+      const response = await fetch('http://localhost:8080/users')
+      const data = (await response.json()) as FormSchema[]
+
+      if (response.ok) {
+        setUsers(data)
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async function createUserFetch(user: FormSchema) {
+    try {
+      const response = await fetch('http://localhost:8080/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user)
+      })
+      return response
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(() => {
+    getUsersFetch()
+  }, [])
 
   const {
     register,
@@ -87,11 +118,9 @@ export default function Form() {
     resolver: zodResolver(formSchema)
   })
 
-  console.log('erros', errors)
-
   function handleFormSubmit(data: FormSchema) {
-    console.log('Dados', data)
-    setOutput(JSON.stringify(data, null, 2))
+    createUserFetch(data)
+    setUser(data)
   }
 
   return (
@@ -189,10 +218,29 @@ export default function Form() {
           Submeter
         </button>
       </form>
-      <pre className="mt-4">
-        <p>Payload:</p>
-        <h1>{output}</h1>
-      </pre>
+      <div className="flex flex-col gap-8">
+        <p>Dados enviados:</p>
+        {user && (
+          <div>
+            <p>Nome: {user.nome}</p>
+            <p>Genero: {user.genero}</p>
+            <p>Tipo Sanguíneo: {user.tipoSanguineo}</p>
+            <p>Termos Aceitos: {`${user.termosAceitos ? 'Sim' : 'Não'}`}</p>
+            <p>Data da consulta: {user.dataConsulta}</p>
+          </div>
+        )}
+        <div>
+          <p>Dados vindos da API api:</p>
+          {users?.map((user, i) => (
+            <div className="mb-5 bg-slate-800 p-4" key={user.nome + i}>
+              <p className="text-white">{user.nome}</p>
+              <p className="text-white">{user.genero}</p>
+              <p className="text-white">{user.tipoSanguineo}</p>
+              <p className="text-white">{user.dataConsulta}</p>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   )
 }
